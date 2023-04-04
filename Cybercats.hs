@@ -66,26 +66,3 @@ r *** plens = (r # idlens) >>>> plens
 -- 'reverse derivative' of parametric lenses
 parardiff :: ParaLens p q x s y r -> ParaLens p (Payoff p q) x (Payoff x s) y (Payoff y r)
 parardiff plens = nashator >>>> rdiff plens
-
-corner :: ParaLens p q () () p q
-corner = MkLens (\(p, ()) -> p, \(p, ()) r -> (r, ()))
-
--- lunitor :: Lens x s (x, ()) (s, ())
--- lunitor = MkLens (\x -> (x, ()), \x (s, ()) -> s)
-
--- runitor :: Lens x s ((), x) ((), s)
--- runitor = MkLens (\x -> ((), x), \x ((), s) -> s)
-
-type Pred x = x -> Bool
-
-class Listable x where
-    list :: [x]
-
-instance (Listable x, Listable y) => Listable (x, y) where
-    list = [(a, b) | a <- list, b <- list]
-
-argmax :: (Ord a, Eq a, Listable x) => (x -> a) -> (x -> Bool)
-argmax k x = k x == maximum (map k list)
-
-argmax_player :: (Ord a, Eq a, Listable x) => Lens x (Pred x) x (Payoff x a)
-argmax_player = MkLens (id, \p k -> argmax (costate2payoff k))
