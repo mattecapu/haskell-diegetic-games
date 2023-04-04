@@ -17,4 +17,4 @@ payoffPD (Cooperate,    Defect) = (0, 3)
 payoffPD (Defect,    Cooperate) = (3, 0)
 payoffPD (Defect,       Defect) = (1, 1)
 
-gamePD = ((argmax_player # argmax_player) *** nashator *** parardiff ((corner ## corner) >>>> payoff2costate payoffPD)) >>>> unitor
+gamePD = ((argmax_player #--# argmax_player) *** nashator *** parardiff ((corner #^^# corner) >--> payoff2costate payoffPD)) >--> unitor
