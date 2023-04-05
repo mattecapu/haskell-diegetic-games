@@ -2,14 +2,10 @@ module PDCollusion where
 
 import GameHelper
 import PD
+import Bimatrix
 
-newtype TwoDoubles = MkTwo (Double, Double) deriving (Eq)
+colluding_player :: Player (MovesPD, MovesPD) TwoDoubles (MovesPD, MovesPD)
+colluding_player = argmax_player
 
-instance Ord (TwoDoubles) where
-  (<=) = \(MkTwo (x, y)) (MkTwo (x', y')) -> x <= x' && y <= y'
-  (<) = \(MkTwo (x, y)) (MkTwo (x', y')) -> x < x' && y < y'
-
-totwodoubles :: Lens x TwoDoubles x (Double, Double)
-totwodoubles = MkLens (id, \_ (x,y) -> MkTwo (x, y))
-
-gamePDCollusion = (argmax_player' *** parardiff (totwodoubles *** ((corner #^^# corner) >--> fun2costate payoffPD))) >--> runitor
+gamePDCollusion = MkGame (colluding_player, bimatrixArena)
+equilibriaPDCollusion = equilibria gamePDCollusion (bimatrixContext payoffPD)
