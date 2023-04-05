@@ -1,6 +1,5 @@
 module PD where
 
-import Cybercats
 import GameHelper
 
 data MovesPD = Cooperate | Defect

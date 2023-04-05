@@ -1,6 +1,5 @@
 module Ultimatum where
 
-import Cybercats
 import GameHelper
 
 data MovesUltimatum1 = Fair | Unfair deriving Eq

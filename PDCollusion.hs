@@ -1,6 +1,5 @@
 module PDCollusion where
 
-import Cybercats
 import GameHelper
 import PD
 
