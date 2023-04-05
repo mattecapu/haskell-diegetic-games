@@ -20,10 +20,23 @@ fun2costate k = MkLens (\x -> (), \x () -> k x)
 idlens :: Lens x s x s
 idlens = MkLens (\x -> x, \x s -> s)
 
+bwd ::  (r -> s) -> Lens x s x r
+bwd f = MkLens (id, \_ -> f)
+
+fwd ::  (x -> y) -> Lens x s y s
+fwd fsharp = MkLens (fsharp, \_ -> id)
+
 -- diagrammatic composition of lenses
 infixr 4 >-->
 (>-->) :: Lens x s y r -> Lens y r z t -> Lens x s z t
 (MkLens (play, coplay)) >--> (MkLens (play', coplay')) = MkLens (play' . play, \x t -> coplay x (coplay' (play x) t))
+
+adapter :: (x -> y) -> (r -> s) -> Lens x s y r
+adapter f fsharp = fwd f >--> bwd fsharp
+
+-- symmetry morphism for the monoidal category of lenses
+exchange :: Lens (x, x') (s, s') (x', x) (s', s)
+exchange = let swap = \(x, y) -> (y, x) in adapter swap swap
 
 -- monoidal product of lenses
 infixr 4 #--#
@@ -96,9 +109,9 @@ infixr 4 #-^#
 top #-^# bottom = symmetry >--> top #--# bottom
 
 -- builds a full parametric lens out of two half ones
-stack :: ParaLens p () x () y () -> ParaLens () q' () s' () r' -> ParaLens p q' x s' y r'
-stack top bottom = let MkLens (play, _) = top
-                       MkLens (_, coplay) = bottom
+nextto :: ParaLens p () x () y () -> ParaLens () q' () s' () r' -> ParaLens p q' x s' y r'
+nextto top bottom = let MkLens (play, _) = top
+                        MkLens (_, coplay) = bottom
                     in MkLens (play, \_ -> coplay ((), ()))
 
 parascalar2fun :: ParaLens p q () () () () -> (p -> q)
