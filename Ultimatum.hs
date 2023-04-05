@@ -38,4 +38,4 @@ second_stage = MkLens (eval_play, \_ r -> (r, ()))
 
 arenaUltimatum = (first_stage >^-> interlude) >^^> (second_stage #^-# idlens)
 
-gameUltimatum = (argmax_player #--# argmax_player) *** nashator *** parardiff (arenaUltimatum >^-> (payoff2costate (payoffUltimatum . exchange))) >--> unitor
+gameUltimatum = (argmax_player' #--# argmax_player') *** nashator *** parardiff (arenaUltimatum >^-> (fun2costate (payoffUltimatum . exchange))) >--> runitor

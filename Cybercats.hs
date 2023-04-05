@@ -1,38 +1,45 @@
 module Cybercats where
 
 newtype Lens x s y r = MkLens (x -> y, x -> r -> s)
+
 type Payoff x s = Lens x s () ()
 type Point x s = Lens () () x s
+
+point2state :: x -> Point x s
+point2state x = MkLens(\() -> x, \() s -> ())
+
+state2point :: Point x s -> x
+state2point (MkLens (x, _)) = x ()
+
+costate2fun :: Payoff x s -> (x -> s)
+costate2fun (MkLens (_, coplay)) x = coplay x ()
+
+fun2costate :: (x -> s) -> Payoff x s
+fun2costate k = MkLens (\x -> (), \x () -> k x)
+
+idlens :: Lens x s x s
+idlens = MkLens (\x -> x, \x s -> s)
 
 -- diagrammatic composition of lenses
 infixr 4 >-->
 (>-->) :: Lens x s y r -> Lens y r z t -> Lens x s z t
 (MkLens (play, coplay)) >--> (MkLens (play', coplay')) = MkLens (play' . play, \x t -> coplay x (coplay' (play x) t))
 
--- 'reverse derivative' of lenses
-rdiff :: Lens x s y r -> Lens x (Payoff x s) y (Payoff y r)
-rdiff lens = let MkLens (play, coplay) = lens in MkLens (play, \x k -> lens >--> k)
-
 -- monoidal product of lenses
 infixr 4 #--#
 (#--#) :: Lens x s y r -> Lens x' s' y' r' -> Lens (x, x') (s, s') (y, y') (r, r')
 (MkLens (play, coplay)) #--# (MkLens (play', coplay')) = MkLens (\ (x, x') -> (play x, play' x'), \ (x, x') (r, r') -> (coplay x r, coplay' x' r'))
 
--- point2lens :: x -> Point x s
--- point2lens x = MkLens(\() -> x, \() s -> ())
-
-costate2payoff :: Payoff x s -> (x -> s)
-costate2payoff (MkLens (_, coplay)) x = coplay x ()
-
-payoff2costate :: (x -> s) -> Payoff x s
-payoff2costate k = MkLens (\x -> (), \x () -> k x)
+-- 'reverse derivative' of lenses
+rdiff :: Lens x s y r -> Lens x (Payoff x s) y (Payoff y r)
+rdiff lens = let MkLens (play, coplay) = lens in MkLens (play, \x k -> lens >--> k)
 
 -- the relevant part of the nashator without the lensy overhead
 nashator_sharp :: (x, x') -> ((x, x') -> (s, s')) -> (x -> s, x' -> s')
 nashator_sharp (x0, x0') k = (\x -> fst (k (x, x0')), \x' -> snd (k (x0, x')))
 
 nashator :: Lens (x, x') (Payoff x s, Payoff x' s') (x, x') (Payoff (x, x') (s, s'))
-nashator = MkLens (id, \xx0 k -> let (k1, k2) = nashator_sharp xx0 (costate2payoff k) in (payoff2costate k1, payoff2costate k2))
+nashator = MkLens (id, \xx0 k -> let (k1, k2) = nashator_sharp xx0 (costate2fun k) in (fun2costate k1, fun2costate k2))
 
 -- parametric lenses
 type ParaLens p q x s y r = Lens (p, x) (q, s) y r
@@ -94,9 +101,8 @@ stack top bottom = let MkLens (play, _) = top
                        MkLens (_, coplay) = bottom
                     in MkLens (play, \_ -> coplay ((), ()))
 
-
-idlens :: Lens x s x s
-idlens = MkLens (\x -> x, \x s -> s)
+parascalar2fun :: ParaLens p q () () () () -> (p -> q)
+parascalar2fun (MkLens (_, coplay)) p = fst (coplay (p, ()) ())
 
 -- reparameterization
 infixr 5 ***

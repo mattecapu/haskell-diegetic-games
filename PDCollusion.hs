@@ -12,4 +12,4 @@ instance Ord (TwoDoubles) where
 totwodoubles :: Lens x TwoDoubles x (Double, Double)
 totwodoubles = MkLens (id, \_ (x,y) -> MkTwo (x, y))
 
-gamePDCollusion = (argmax_player *** parardiff (totwodoubles *** ((corner #^^# corner) >--> payoff2costate payoffPD))) >--> unitor
+gamePDCollusion = (argmax_player' *** parardiff (totwodoubles *** ((corner #^^# corner) >--> fun2costate payoffPD))) >--> runitor
