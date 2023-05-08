@@ -1,9 +1,14 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 
+{-
+  General boilerplate for two-players, simultaneous games
+-}
+
 module Bimatrix where
 
 import GameHelper
 
+-- this is the type of a pair of doubles with the right order structure
 type TwoDoubles = (Double, Double)
 
 instance {-# OVERLAPPING #-} Ord (TwoDoubles) where
